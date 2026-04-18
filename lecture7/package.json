@@ -1,0 +1,16 @@
+{
+  "name": "lecture7",
+  "version": "1.0.0",
+  "description": "This project created for npm learning",
+  "license": "ISC",
+  "author": "",
+  "main": "app.js",
+  "type": "module",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "nodemon app.js"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.14"
+  }
+}
