@@ -6,7 +6,6 @@
   <li>MongoDB</li>
   <li>TailwindCSS for Frontend</li>
   <li><b>What you should learn before:</b></li>
-  <li>React for Frontend</li>
   <li>HTML</li>
   <li>CSS</li>
   <li>Basic JS</li>
