@@ -4,6 +4,9 @@
   <li>NODEJS</li>
   <li>ExpressJS</li>
   <li>MongoDB</li>
+  <li>EJS</li>
+  <li>SQL</li>
+  <li>Mongoose</li>
   <li>TailwindCSS for Frontend</li>
   <li><b>What you should learn before:</b></li>
   <li>HTML</li>
