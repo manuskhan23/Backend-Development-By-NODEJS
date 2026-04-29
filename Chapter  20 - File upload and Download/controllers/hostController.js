@@ -1,0 +1,147 @@
+const Home = require("../models/home");
+const fs = require("fs");
+
+exports.getAddHome = (req, res, next) => {
+  res.render("host/edit-home", {
+    pageTitle: "Add Home to airbnb",
+    currentPage: "addHome",
+    editing: false,
+    isLoggedIn: req.isLoggedIn,
+    user: req.session.user,
+  });
+};
+
+exports.getEditHome = (req, res, next) => {
+  const homeId = req.params.homeId;
+  const editing = req.query.editing === "true";
+
+  Home.findById(homeId).then((home) => {
+    if (!home) {
+      console.log("Home not found for editing.");
+      return res.redirect("/host/host-home-list");
+    }
+
+    console.log(homeId, editing, home);
+    res.render("host/edit-home", {
+      home: home,
+      pageTitle: "Edit your Home",
+      currentPage: "host-homes",
+      editing: editing,
+      isLoggedIn: req.isLoggedIn,
+      user: req.session.user,
+    });
+  });
+};
+
+exports.getHostHomes = (req, res, next) => {
+  Home.find().then((registeredHomes) => {
+    res.render("host/host-home-list", {
+      registeredHomes: registeredHomes,
+      pageTitle: "Host Homes List",
+      currentPage: "host-homes",
+      isLoggedIn: req.isLoggedIn,
+      user: req.session.user,
+    });
+  });
+};
+
+exports.postAddHome = (req, res, next) => {
+  const { houseName, price, location, rating, description } = req.body;
+  console.log(houseName, price, location, rating, description);
+  console.log(req.files);
+
+  if (!req.files || !req.files.photo) {
+    return res.status(422).send("No image provided");
+  }
+
+  const photo = req.files.photo[0].path;
+  const rulesPdf = req.files.rulesPdf ? req.files.rulesPdf[0].path : null;
+
+  const home = new Home({
+    houseName,
+    price,
+    location,
+    rating,
+    photo,
+    rulesPdf,
+    description,
+  });
+  home.save().then(() => {
+    console.log("Home Saved successfully");
+  });
+
+  res.redirect("/host/host-home-list");
+};
+
+exports.postEditHome = (req, res, next) => {
+  const { id, houseName, price, location, rating, description } =
+    req.body;;
+  Home.findById(id)
+    .then((home) => {
+      home.houseName = houseName;
+      home.price = price;
+      home.location = location;
+      home.rating = rating;
+      home.description = description;
+
+      if (req.files && req.files.photo) {
+        if (home.photo) {
+          fs.unlink(home.photo, (err) => {
+            if (err) {
+              console.log("Error while deleting old photo ", err);
+            }
+          });
+        }
+        home.photo = req.files.photo[0].path;
+      }
+
+      if (req.files && req.files.rulesPdf) {
+        if (home.rulesPdf) {
+          fs.unlink(home.rulesPdf, (err) => {
+            if (err) {
+              console.log("Error while deleting old PDF ", err);
+            }
+          });
+        }
+        home.rulesPdf = req.files.rulesPdf[0].path;
+      }
+
+      home
+        .save()
+        .then((result) => {
+          console.log("Home updated ", result);
+        })
+        .catch((err) => {
+          console.log("Error while updating ", err);
+        });
+      res.redirect("/host/host-home-list");
+    })
+    .catch((err) => {
+      console.log("Error while finding home ", err);
+    });
+};
+
+exports.postDeleteHome = (req, res, next) => {
+  const homeId = req.params.homeId;
+  console.log("Came to delete ", homeId);
+  Home.findById(homeId)
+    .then((home) => {
+      if (home.photo) {
+        fs.unlink(home.photo, (err) => {
+          if (err) console.log("Error while deleting photo ", err);
+        });
+      }
+      if (home.rulesPdf) {
+        fs.unlink(home.rulesPdf, (err) => {
+          if (err) console.log("Error while deleting PDF ", err);
+        });
+      }
+      return Home.findByIdAndDelete(homeId);
+    })
+    .then(() => {
+      res.redirect("/host/host-home-list");
+    })
+    .catch((error) => {
+      console.log("Error while deleting ", error);
+    });
+};
